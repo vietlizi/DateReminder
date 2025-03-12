@@ -1,5 +1,4 @@
 # Date Reminder
-![icon-192-maskable](https://github.com/user-attachments/assets/c677e9e1-054b-4cfe-a54d-f93263e8a459)
 *A simple (yet boring) date reminder for Vietnamese students that will make you have PTSD whenever looking at your computer.*
 
 ## What is this?  
