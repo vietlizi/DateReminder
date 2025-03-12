@@ -1,0 +1,36 @@
+name: Build the app
+
+on:
+  push:
+    branches:
+      - eoleun
+  pull_request:
+    branches:
+      - eoleun
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Xcode
+        run: sudo xcode-select -switch /Applications/Xcode.app
+
+      - name: Build macOS App
+        run: |
+          xcodebuild -scheme DateReminder -configuration Release -derivedDataPath build
+
+      - name: Create DMG
+        run: |
+          mkdir -p dmg
+          cp -R build/Build/Products/Release/DateReminder.app dmg/
+          hdiutil create -volname "DateReminder" -srcfolder dmg -ov -format UDZO DateReminder.dmg
+
+      - name: Upload DMG Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DateReminder-dmg
+          path: DateReminder.dmg
