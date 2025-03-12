@@ -1,5 +1,5 @@
 # Date Reminder
-![appstore](https://github.com/user-attachments/assets/8da080fb-d16c-414f-99dd-79d433a4511d)
+![icon-192-maskable](https://github.com/user-attachments/assets/c677e9e1-054b-4cfe-a54d-f93263e8a459)
 *A simple (yet boring) date reminder for Vietnamese students that will make you have PTSD whenever looking at your computer.*
 
 ## What is this?  
@@ -11,12 +11,12 @@ I don't really know, tests is approaching nearby and what I'm doing is learning 
 3. Launch the app and prepare to suffer (responsibly).
 4. Enjoy having PSTD everytime look at your computer.
 
-## Build It Yourself  
+## Preview
+<img width="177" alt="image" src="https://github.com/user-attachments/assets/1142e0a8-a107-45dc-9bd5-0cf5f6357318" />
+
+### Build It Yourself  
 If you enjoy suffering, you can build it manually:  
 ```bash
-git clone https://github.com/YOUR_USERNAME/DateReminder.git
+git clone https://github.com/vietlizi/DateReminder.git
 cd DateReminder
 xcodebuild -scheme "DateReminder" -configuration Release
-
-## Preview
-<img width="176" alt="image" src="https://github.com/user-attachments/assets/bfa9837a-bfdf-4e35-9d17-83a6b933892d" />
