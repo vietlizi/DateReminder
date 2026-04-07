@@ -1,23 +1,28 @@
-//
 //  DateReminderApp.swift
 //  DateReminder
-//
-//  Created by Hodaka on 13/3/25.
-//
 
 import SwiftUI
+import UserNotifications
 
 @main
 struct DateReminderApp: App {
-    @StateObject var countdownManager = CountdownManager()
+    @StateObject private var countdownManager = CountdownManager()
+    @StateObject private var pomodoroManager  = PomodoroManager()
 
     var body: some Scene {
         MenuBarExtra {
-            MenuView()
+            RootView()
                 .environmentObject(countdownManager)
+                .environmentObject(pomodoroManager)
+                .preferredColorScheme(.dark)
+                .environment(\.locale, Locale(identifier: countdownManager.currentLanguage))
         } label: {
-            Text(countdownManager.statusBarText)
+            Text(pomodoroManager.isRunning
+                 ? pomodoroManager.menuBarText
+                 : countdownManager.statusBarText)
+                .monospacedDigit()
+                .animation(.none, value: pomodoroManager.menuBarText)
         }
-        .menuBarExtraStyle(.menu)
+        .menuBarExtraStyle(.window)
     }
 }

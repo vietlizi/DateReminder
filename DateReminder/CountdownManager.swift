@@ -1,51 +1,131 @@
-//
 //  CountdownManager.swift
 //  DateReminder
-//
-//  Created by Hodaka on 13/3/25.
-//
-
 
 import SwiftUI
 
+enum DisplayMode: String, CaseIterable, Codable {
+    case percent, days, hours
+}
+
+struct DailyQuote {
+    let text: String
+    let author: String
+}
+
 class CountdownManager: ObservableObject {
-    @Published var events: [CountdownEvent] = []
+    @Published var events:        [CountdownEvent] = []
     @Published var selectedEvent: CountdownEvent?
-    @Published var statusBarText: String = "Loading..."
+    @Published var displayMode:   DisplayMode      = .percent
+    @Published var statusBarText: String           = "Loading..."
+    @Published var todaysQuote:   DailyQuote       = DailyQuote(text: "", author: "")
+
+    @Published var currentLanguage: String = UserDefaults.standard.string(forKey: "AppLanguage") ?? "vi"
+    var isVI: Bool { currentLanguage == "vi" }
+
+    private var refreshTimer: Timer?
+    private let saveKey = "SavedCountdownEvents"
+    private let modeKey = "SavedDisplayMode"
+
+    private let quotePool: [DailyQuote] = [
+        DailyQuote(text: "Muốn thành công thì phải chấp nhận mạo hiểm, nguy hiểm nhưng trong tầm kiểm soát.", author: "Khuyết danh"),
+        DailyQuote(text: "Học, học nữa, học mãi", author: "Chủ tịch Hồ Chí Minh"),
+        DailyQuote(text: "Stay hungry, stay foolish.", author: "Steve Jobs"),
+    ]
 
     init() {
-        loadDefaultEvents()
+        loadEvents()
+        if let savedMode = UserDefaults.standard.string(forKey: modeKey), let mode = DisplayMode(rawValue: savedMode) {
+            self.displayMode = mode
+        }
+        pickDailyQuote()
         updateStatusBarText()
+        startRefreshTimer()
     }
 
-    func loadDefaultEvents() {
-        let calendar = Calendar.current
+    deinit { refreshTimer?.invalidate() }
 
-        let defaultDates: [(String, DateComponents)] = [
-            ("TSA", DateComponents(year: 2025, month: 4, day: 26)),
-            ("THPT QG", DateComponents(year: 2025, month: 6, day: 27)),
-            ("New Year", DateComponents(year: 2026, month: 1, day: 1)),
-            ("Lunar New Year", DateComponents(year: 2026, month: 2, day: 17))
-        ]
-
-        self.events = defaultDates.compactMap { name, components in
-            if let eventDate = calendar.date(from: components) {
-                return CountdownEvent(name: name, date: eventDate)
-            }
-            return nil
+    func loadEvents() {
+        if let data = UserDefaults.standard.data(forKey: saveKey),
+           let decoded = try? JSONDecoder().decode([CountdownEvent].self, from: data) {
+            self.events = decoded
+        } else {
+            // DEMO BẠN YÊU CẦU: THPT & TSA
+            let cal = Calendar.current
+            let thptDate = cal.date(from: DateComponents(year: 2026, month: 6, day: 11))!
+            let tsaDate = cal.date(from: DateComponents(year: 2026, month: 5, day: 16))!
+            
+            self.events = [
+                CountdownEvent(name: "Kì thi THPT", date: thptDate, startDate: Date()),
+                CountdownEvent(name: "TSA", date: tsaDate, startDate: Date())
+            ]
         }
+        if selectedEvent == nil { selectedEvent = events.first }
+    }
 
-        if let firstEvent = events.first {
-            selectedEvent = firstEvent
+    func saveEvents() {
+        if let encoded = try? JSONEncoder().encode(events) {
+            UserDefaults.standard.set(encoded, forKey: saveKey)
         }
+    }
+
+    func addNewEvent(name: String, targetDate: Date) {
+        let newEvent = CountdownEvent(name: name, date: targetDate, startDate: Date())
+        DispatchQueue.main.async {
+            self.events.append(newEvent)
+            self.selectedEvent = newEvent
+            self.saveEvents()
+            self.updateStatusBarText()
+        }
+    }
+
+    func deleteSelectedEvent() {
+        guard let current = selectedEvent else { return }
+        DispatchQueue.main.async {
+            self.events.removeAll { $0.id == current.id }
+            self.selectedEvent = self.events.first
+            self.saveEvents()
+            self.updateStatusBarText()
+        }
+    }
+
+    func cycleDisplayMode() {
+        let all = DisplayMode.allCases
+        if let idx = all.firstIndex(of: displayMode) {
+            let next = all[(idx + 1) % all.count]
+            displayMode = next
+            UserDefaults.standard.set(next.rawValue, forKey: modeKey)
+            updateStatusBarText()
+        }
+    }
+
+    func toggleLanguage() {
+        currentLanguage = isVI ? "en" : "vi"
+        UserDefaults.standard.set(currentLanguage, forKey: "AppLanguage")
         updateStatusBarText()
     }
 
     func updateStatusBarText() {
-        if let event = selectedEvent {
-            statusBarText = "\(event.name): \(event.daysLeft) days left"
-        } else {
-            statusBarText = "No upcoming events"
+        guard let event = selectedEvent else {
+            statusBarText = isVI ? "Không có sự kiện" : "No events"
+            return
+        }
+        let name = event.name
+        switch displayMode {
+        case .percent:
+            let p = String(format: "%.1f", event.percentLeft)
+            statusBarText = isVI ? "\(p)% cho đến \(name)" : "\(p)% until \(name)"
+        case .days:
+            statusBarText = isVI ? "\(event.daysLeft) ngày cho đến \(name)" : "\(event.daysLeft) days left until \(name)"
+        case .hours:
+            statusBarText = isVI ? "\(event.hoursLeft) giờ cho đến \(name)" : "\(event.hoursLeft) hours left until \(name)"
+        }
+    }
+
+    func displayModeLabel() -> String {
+        switch displayMode {
+        case .percent: return isVI ? "% Còn Lại" : "% Left"
+        case .days: return isVI ? "Chỉ Ngày" : "Days Only"
+        case .hours: return isVI ? "Chỉ Giờ" : "Hours Only"
         }
     }
 
@@ -54,5 +134,14 @@ class CountdownManager: ObservableObject {
             self.selectedEvent = event
             self.updateStatusBarText()
         }
+    }
+
+    func pickDailyQuote() { todaysQuote = quotePool.randomElement()! }
+
+    private func startRefreshTimer() {
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            DispatchQueue.main.async { self?.updateStatusBarText() }
+        }
+        RunLoop.main.add(refreshTimer!, forMode: .common)
     }
 }
