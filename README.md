@@ -1,21 +1,25 @@
 # Date Reminder
-*A simple (yet boring) date reminder for Vietnamese students that will make you have PTSD whenever looking at your computer.*
+*A high-pressure countdown tool for students who want to experience professional-grade anxiety every time they look at their Mac.*
 
-## What is this?  
-I don't really know, tests is approaching nearby and what I'm doing is learning Swift (lmfao)
+## Overview
+Built in Swift during the peak of "procrastination-induced productivity," this app ensures you never forget how little time you have left before exams or project deadlines. 
 
-## Installation  
-1. **Download the latest version** from [Releases](https://github.com/vietlizi/DateReminder/releases).  
-2. Open the `.dmg` file and drag **DateReminder.app** to your Applications folder.  
-3. Launch the app and prepare to suffer (responsibly).
-4. Enjoy having PSTD everytime look at your computer.
+## Key Features
+* [cite_start]**Precision Countdown**: Track your remaining time in Days, Hours, and Minutes[cite: 5, 10, 15].
+* [cite_start]**Bilingual Support**: Full English and Vietnamese localization with an instant toggle[cite: 2, 4, 6].
+* [cite_start]**Dynamic Status Bar**: Choose between displaying Percentage, Days, or Detailed time directly in the macOS menu bar[cite: 22, 23, 24].
+* **Smart Percentage**: Progress is calculated starting from Jan 1st of the event year to give you the "big picture" of your suffering.
+* [cite_start]**Persistence**: Your custom events are saved locally so they won't disappear when you restart[cite: 1, 2].
+* [cite_start]**Integrated Pomodoro**: A built-in focus timer with live menu bar syncing to help you actually get to work[cite: 17, 18, 19].
 
-## Preview
-<img width="177" alt="image" src="https://github.com/user-attachments/assets/1142e0a8-a107-45dc-9bd5-0cf5f6357318" />
+## Installation
+1.  Download the latest DMG from [Releases](https://github.com/whooslizi/DateReminder/releases).
+2.  Drag **DateReminder.app** to your **Applications** folder.
+3.  Launch the app and enjoy your newly acquired PTSD responsibly.
 
-### Build It Yourself  
-If you enjoy suffering, you can build it manually:  
+## Build It Yourself
+If you prefer building things the hard way:
 ```bash
-git clone https://github.com/vietlizi/DateReminder.git
+git clone [https://github.com/whooslizi/DateReminder.git](https://github.com/whooslizi/DateReminder.git)
 cd DateReminder
 xcodebuild -scheme "DateReminder" -configuration Release
